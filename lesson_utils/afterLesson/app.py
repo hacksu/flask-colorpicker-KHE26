@@ -33,8 +33,9 @@ def update():
 @app.route("/update_number", methods=["POST"])
 def asdlkfja():
     num1 = int(request.form.get("number"))
-    global number
-    number = num1
+    if 0 > num1 and num1 <= 4:   # validate that the number is between 1 and 4 inclusive
+        global number
+        number = num1
     return redirect("/")
 
 
@@ -46,8 +47,7 @@ def oooooooooooooooo():
     a = a.json()
 
     print(a)
-    for key in list(colors.keys()):
-        colors[key] = a
+    colors[number-1] = a;
     return redirect("/")
 
 
