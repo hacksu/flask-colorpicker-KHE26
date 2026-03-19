@@ -123,7 +123,9 @@ Line by line:
 
 ## The template
 
-Create a new folder called `templates` in the project root. Inside it, create a file called `index.html`. Add this:
+Create a new folder called `templates` in the project root. Inside it, create a file called `index.html`.
+
+**Start with the skeleton and styles.** Copy this in exactly, we'll add the important stuff after:
 
 ```html
 <!DOCTYPE html>
@@ -154,21 +156,41 @@ Create a new folder called `templates` in the project root. Inside it, create a 
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="/picker?square=0"><div class="square" style="background-color: {{ colors.get(0) }};"></div></a>
-        <a href="/picker?square=1"><div class="square" style="background-color: {{ colors.get(1) }};"></div></a>
-        <a href="/picker?square=2"><div class="square" style="background-color: {{ colors.get(2) }};"></div></a>
-        <a href="/picker?square=3"><div class="square" style="background-color: {{ colors.get(3) }};"></div></a>
-    </div>
+
 </body>
 </html>
 ```
 
-Line by line:
-- `<style>`, CSS to make things look nice. The important part: `.square` sets each colored box to 150×150 pixels
-- `<div class="container">`, a box that holds all four squares side by side (that's what `display: flex` does)
-- `<a href="/picker?square=0">`, a link to the picker page. The `?square=0` part is a **URL parameter**, it tells the picker page which square the user clicked. We'll use this in the next step
-- `<div class="square" style="background-color: {{ colors.get(0) }};">`, the colored square itself. `{{ colors.get(0) }}` pulls color #0 out of our Python dictionary and puts it directly into the CSS
+The `<style>` block is CSS that makes things look nice. The part that matters: `.square` sets each colored box to 150x150 pixels, and `.container` uses `display: flex` to lay them out side by side.
+
+**Now add the container.** Inside `<body>`, add:
+
+```html
+    <div class="container">
+
+    </div>
+```
+
+This is just a box to hold our squares. The `class="container"` hooks it up to the CSS above.
+
+**Now add the first square.** Inside the container div, add:
+
+```html
+        <a href="/picker?square=0"><div class="square" style="background-color: {{ colors.get(0) }};"></div></a>
+```
+
+Breaking this down:
+- `<a href="/picker?square=0">`, a link to the picker page. `?square=0` is a **URL parameter**, it tells the picker which square was clicked
+- `<div class="square" ...>`, the colored square itself
+- `style="background-color: {{ colors.get(0) }};"`, this is Jinja2 in action. `{{ colors.get(0) }}` pulls the color for square 0 out of our Python dictionary and drops it right into the CSS
+
+**Add the other three squares** the same way, just change the number each time:
+
+```html
+        <a href="/picker?square=1"><div class="square" style="background-color: {{ colors.get(1) }};"></div></a>
+        <a href="/picker?square=2"><div class="square" style="background-color: {{ colors.get(2) }};"></div></a>
+        <a href="/picker?square=3"><div class="square" style="background-color: {{ colors.get(3) }};"></div></a>
+```
 
 ## Run it
 
@@ -202,7 +224,9 @@ Line by line:
 
 ## The template
 
-Create `templates/picker.html`:
+Create `templates/picker.html`.
+
+**Start with the skeleton and styles:**
 
 ```html
 <!DOCTYPE html>
@@ -246,24 +270,55 @@ Create `templates/picker.html`:
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Pick a color for Square {{ square }}</h1>
-        <form method="POST" action="/update_color">
-            <input type="color" name="color" value="{{ colors.get(square) }}">
-            <input type="hidden" name="square" value="{{ square }}">
-            <button type="submit">Save</button>
-        </form>
-    </div>
+
 </body>
 </html>
 ```
 
-Line by line:
-- `<h1>Pick a color for Square {{ square }}</h1>`, the heading. `{{ square }}` inserts the square number from Python, so it'll say "Pick a color for Square 0", "Square 1", etc.
-- `<form method="POST" action="/update_color">`, a form that sends data to `/update_color` when submitted. `method="POST"` means the data is sent in the request body (more on that in the next step). `action` is where the form gets sent
-- `<input type="color" name="color" value="{{ colors.get(square) }}">`, the color picker. `type="color"` makes the browser show a color wheel. `value` sets the starting color to whatever the square is currently. `name="color"` is how we'll read it on the server
-- `<input type="hidden" name="square" value="{{ square }}">`, invisible to the user, but sends the square number along with the form so we know which square to update. Without this, the server wouldn't know which one changed
-- `<button type="submit">Save</button>`, submits the form
+**Add the container and heading.** Inside `<body>`:
+
+```html
+    <div class="container">
+        <h1>Pick a color for Square {{ square }}</h1>
+    </div>
+```
+
+`{{ square }}` is Jinja2 again. It'll say "Pick a color for Square 0", "Square 1", etc. depending on which one was clicked.
+
+**Add the form.** Inside the container div, after the `<h1>`:
+
+```html
+        <form method="POST" action="/update_color">
+
+        </form>
+```
+
+- `method="POST"`, this means the form data is sent in the request body, not the URL. We'll handle it in Step 5
+- `action="/update_color"`, this is where the form gets sent when the user clicks Save
+
+**Add the color picker input.** Inside the form:
+
+```html
+            <input type="color" name="color" value="{{ colors.get(square) }}">
+```
+
+- `type="color"`, tells the browser to show a color picker wheel
+- `name="color"`, this is the key we'll use to read the value on the server
+- `value="{{ colors.get(square) }}"`, sets the starting color to whatever the square is currently set to
+
+**Add a hidden input** to send the square number along with the form. Without this, the server won't know which square to update:
+
+```html
+            <input type="hidden" name="square" value="{{ square }}">
+```
+
+It's invisible to the user but gets submitted with the form. `name="square"` is how we'll read it on the server.
+
+**Add the submit button:**
+
+```html
+            <button type="submit">Save</button>
+```
 
 ## Run it
 
